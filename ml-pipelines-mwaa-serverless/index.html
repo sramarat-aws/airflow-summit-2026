@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>ML Pipelines on Amazon MWAA Serverless</title>
+
+	<link rel="icon" type="image/png" href="talk-assets/favicon.png">
+	<link rel="stylesheet" href="dist/reset.css">
+	<link rel="stylesheet" href="dist/reveal.css">
+	<link rel="stylesheet" href="dist/theme/black.css">
+	<link rel="stylesheet" href="dist/plugin/highlight/monokai.css">
+
+	<style>
+		/* ============================================================
+		   Airflow Summit 2026 theme — MWAA Serverless talk
+		   black bg, cyan headings, Arial, summit logo header
+		   ============================================================ */
+		:root {
+			--af-cyan: #00e5e5;
+			--af-cyan-dim: #0aa8a8;
+			--af-red: #e43921;
+			--af-green: #00ad46;
+			--af-blue: #017cee;
+			--af-teal: #00c7d4;
+			--af-text: #f0f0f0;
+			--af-muted: #9aa5ab;
+			--af-orange: #ff9900;
+		}
+
+		.reveal-viewport { background: #050505; }
+
+		.reveal {
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 30px;
+			color: var(--af-text);
+		}
+
+		.reveal h1, .reveal h2, .reveal h3 {
+			font-family: Arial, Helvetica, sans-serif;
+			font-weight: 700;
+			color: var(--af-cyan);
+			text-transform: none;
+			letter-spacing: 0;
+		}
+		.reveal h2 { font-size: 1.6em; margin-bottom: 0.7em; }
+
+		.reveal .slides section { text-align: left; }
+
+		.reveal ul { display: block; margin-left: 1em; }
+		.reveal li { margin: 0.45em 0; line-height: 1.35; }
+
+		.reveal .muted { color: var(--af-muted); }
+		.reveal strong { color: #fff; }
+		.reveal code {
+			font-family: "Courier New", monospace;
+			background: #1b2224;
+			color: var(--af-cyan);
+			padding: 0 0.25em;
+			border-radius: 4px;
+			font-size: 0.9em;
+		}
+
+		/* Summit logo pinned top-right on content slides */
+		.summit-badge {
+			position: absolute;
+			top: 0px;
+			right: 0px;
+			width: 150px;
+			opacity: 0.95;
+		}
+
+		/* faint scattered-pinwheel backdrop */
+		.backdrop-scatter {
+			background-image: url("talk-assets/summit_pinwheel_scatter.png");
+			background-size: cover;
+		}
+
+		/* ---------- Title slide ---------- */
+		.title-slide { text-align: left; }
+		.title-slide h1 {
+			font-size: 1.9em;
+			color: #fff;
+			line-height: 1.15;
+			margin-top: 1.6em;
+		}
+		.title-slide h1 .accent { color: var(--af-cyan); }
+		.title-skyline {
+			position: absolute; right: -60px; bottom: 42px;
+			width: 480px; opacity: 0.9; pointer-events: none;
+		}
+		.title-banner {
+			display: inline-block;
+			background: var(--af-cyan);
+			color: #04252a;
+			padding: 14px 28px;
+			border-radius: 8px;
+			font-size: 0.85em;
+			font-weight: 700;
+			line-height: 1.8;
+			margin-top: 2em;
+		}
+		.title-banner .sub { font-weight: 400; font-size: 0.75em; display: block; color: #0b3d42; }
+		.title-banner .sub-inline { font-weight: 400; font-size: 0.78em; color: #0b3d42; }
+		.title-meta { color: var(--af-muted); font-size: 0.6em; margin-top: 2.2em; }
+
+		/* ---------- problem slide ---------- */
+		.problem-wrap { display: flex; align-items: center; min-height: 430px; }
+		.problem-q {
+			font-size: 1.6em; line-height: 1.6; font-weight: 700;
+			color: #fff; margin: 0;
+		}
+		.problem-q .q-highlight { color: var(--af-cyan); }
+		.problem-q .q-pain { color: #ffd166; }
+
+		/* ---------- comparison cards ---------- */
+		.two-ways { display: flex; gap: 30px; margin-top: 10px; }
+		.way-card {
+			flex: 1;
+			border: 2px solid #2a3439;
+			border-radius: 14px;
+			padding: 18px 20px 14px;
+			background: #0d1214;
+		}
+		.way-card h3 { font-size: 0.75em; color: #fff; margin-bottom: 10px; }
+		.way-card.way-old { border-color: #c9a83a; }
+		.way-card.way-old h3 { color: #ffd166; }
+		.way-card.way-new { border-color: var(--af-cyan-dim); }
+		.way-card.way-new h3 { color: var(--af-cyan); }
+		.pros-cons { font-size: 0.55em; line-height: 1.35; }
+		.pros-cons .pro { color: #6be06b; }
+		.pros-cons .con { color: #ff7b6b; }
+		.pros-cons div { margin: 4px 0; }
+
+		/* ---------- feature cards ---------- */
+		.features-grid { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 20px; }
+		.feat-card {
+			flex: 1 1 45%;
+			border: 1px solid #223035;
+			border-radius: 12px;
+			background: #0d1214;
+			padding: 16px 18px;
+			min-width: 260px;
+		}
+		.feat-card h3 { font-size: 0.7em; margin: 0 0 8px; }
+		.feat-card p { font-size: 0.58em; color: var(--af-text); margin: 0; line-height: 1.4; }
+
+		/* ---------- deep-dive grid ---------- */
+		.deep-dive-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 18px;
+			margin-top: 18px;
+		}
+		.dd-card {
+			border: 1px solid #223035;
+			border-radius: 12px;
+			background: #0d1214;
+			padding: 14px 16px;
+		}
+		.dd-card h3 { font-size: 0.68em; margin: 0 0 8px; }
+		.dd-card p, .dd-card ul { font-size: 0.55em; line-height: 1.4; margin: 0; }
+		.dd-card ul { margin-left: 1em; }
+
+		/* ---------- highlight items ---------- */
+		.highlight-item {
+			background: #0d1214;
+			border: 1px solid #223035;
+			border-radius: 10px;
+			padding: 10px 16px;
+			margin: 8px 0;
+			font-size: 0.8em;
+		}
+		.highlight-item .k { color: var(--af-cyan); font-weight: 700; }
+	</style>
+</head>
+<body>
+	<div class="reveal">
+		<div class="slides">
+
+			<!-- ============ 1. TITLE ============ -->
+			<section id="title" class="title-slide backdrop-scatter" data-background-color="#050505">
+				<img src="talk-assets/summit_logo.png" style="width:230px; position:absolute; top:-20px; left:0;" alt="Airflow Summit">
+				<h1>ML Pipelines on<br><span class="accent">Amazon MWAA Serverless</span></h1>
+				<div class="title-meta">Airflow Summit &middot; Austin, TX &middot; Aug 31 &ndash; Sep 2, 2026</div>
+				<img class="title-skyline" src="talk-assets/austin_skyline.png" alt="">
+				<div class="title-banner">
+					Karthik Seshadri <span class="sub-inline">(Sr. SDE, AWS Analytics)</span><br>
+					Sriram Ramarathnam <span class="sub-inline">(SDM, AWS Analytics)</span>
+				</div>
+			</section>
+
+			<!-- ============ 2. THE CHALLENGE ============ -->
+			<section id="challenge" data-background-color="#050505">
+				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
+				<h2>The Challenge</h2>
+				<div class="problem-wrap">
+					<p class="problem-q">
+						Customers love Apache Airflow for orchestration&hellip;<br>
+						but <span class="q-pain">managing infrastructure</span> is not<br>
+						why they chose <span class="q-highlight">Airflow</span>.
+					</p>
+				</div>
+			</section>
+
+			<!-- ============ 3. CUSTOMER BURDEN ============ -->
+			<section id="burden" data-background-color="#050505">
+				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
+				<h2>Customer Burden</h2>
+				<ul>
+					<li class="fragment">Provision &amp; size schedulers, workers, databases</li>
+					<li class="fragment">Manage scaling &mdash; over-provision or risk failures</li>
+					<li class="fragment">Patch, upgrade, and secure the environment</li>
+					<li class="fragment">Handle multi-team access control &amp; isolation</li>
+					<li class="fragment">Pay for idle infrastructure 24/7</li>
+				</ul>
+				<p class="fragment muted" style="margin-top:1.4em; font-size:0.75em;">
+					Teams want to <strong>write DAGs</strong>, not <strong>manage clusters</strong>.
+				</p>
+			</section>
+
+			<!-- ============ 4. PROVISIONED vs SERVERLESS ============ -->
+			<section id="comparison" data-background-color="#050505">
+				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
+				<h2>MWAA Provisioned vs. MWAA Serverless</h2>
+				<div class="two-ways">
+					<div class="way-card way-old fragment fade-right" data-fragment-index="0">
+						<h3>MWAA Provisioned</h3>
+						<div class="pros-cons">
+							<div class="pro">+ Full Airflow UI access</div>
+							<div class="pro">+ Custom operators &amp; plugins</div>
+							<div class="pro">+ Python DAG authoring</div>
+							<div class="con">&ndash; Always-on, hourly billing</div>
+							<div class="con">&ndash; Manual environment sizing</div>
+							<div class="con">&ndash; Shared IAM per environment</div>
+							<div class="con">&ndash; Upgrade cycles to manage</div>
+						</div>
+					</div>
+					<div class="way-card way-new fragment fade-left" data-fragment-index="1">
+						<h3>MWAA Serverless</h3>
+						<div class="pros-cons">
+							<div class="pro">+ Zero infrastructure management</div>
+							<div class="pro">+ Pay only for execution time</div>
+							<div class="pro">+ Per-workflow IAM isolation</div>
+							<div class="pro">+ Automatic scaling</div>
+							<div class="pro">+ Built-in workflow versioning</div>
+							<div class="con">&ndash; YAML-based DAG definitions</div>
+							<div class="con">&ndash; No Airflow UI (monitoring via logs)</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- ============ 5. INTRODUCING MWAA-S ============ -->
+			<section id="intro" data-background-color="#050505">
+				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
+				<h2>Introducing Amazon MWAA Serverless</h2>
+				<p style="font-size:0.8em; margin-bottom: 1em;">GA &mdash; November 17, 2025 &nbsp;|&nbsp; Apache Airflow 3 + Python 3.12</p>
+				<div class="features-grid">
+					<div class="feat-card fragment">
+						<h3>&#9889; Serverless Architecture</h3>
+						<p>No provisioning. No tuning. Submit your workflow YAML and go.</p>
+					</div>
+					<div class="feat-card fragment">
+						<h3>&#128176; Pay-Per-Use</h3>
+						<p>Charged only while tasks execute. Zero idle cost.</p>
+					</div>
+					<div class="feat-card fragment">
+						<h3>&#128274; Workflow Isolation</h3>
+						<p>Each workflow gets its own IAM execution role and isolated compute.</p>
+					</div>
+					<div class="feat-card fragment">
+						<h3>&#128200; Automatic Scaling</h3>
+						<p>Dynamically scales to meet demand &mdash; no manual worker sizing.</p>
+					</div>
+				</div>
+			</section>
+
+			<!-- ============ 6. KEY FEATURES ============ -->
+			<section id="features" data-background-color="#050505">
+				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
+				<h2>Key Features</h2>
+				<div class="highlight-item fragment"><span class="k">YAML Workflow Definitions</span> &mdash; DAG-factory compatible format, versioned in S3</div>
+				<div class="highlight-item fragment"><span class="k">AWS Operator Integration</span> &mdash; S3, Glue, EMR, Redshift, SageMaker, and more</div>
+				<div class="highlight-item fragment"><span class="k">PythonOperator &amp; BashOperator</span> &mdash; Run custom code bundles up to 250 MB <span class="muted">(New! Aug 2026)</span></div>
+				<div class="highlight-item fragment"><span class="k">VPC Support</span> &mdash; Run tasks in your VPC for network isolation</div>
+				<div class="highlight-item fragment"><span class="k">CloudWatch Observability</span> &mdash; Task logs, metrics, and alarms built-in</div>
+				<div class="highlight-item fragment"><span class="k">Workflow Versioning</span> &mdash; Built-in versioning with rollback support</div>
+			</section>
+
+			<!-- ============ 7. PYTHON & BASH DEEP DIVE ============ -->
+			<section id="python-bash" data-background-color="#050505">
+				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
+				<h2>PythonOperator &amp; BashOperator</h2>
+				<p style="font-size:0.7em; color: var(--af-muted); margin-bottom: 18px;">Run custom Python functions and shell scripts directly in the serverless runtime</p>
+				<div class="deep-dive-grid">
+					<div class="dd-card">
+						<h3>&#128187; Execution Model</h3>
+						<ul>
+							<li>Code bundle uploaded to S3 (ZIP, up to 250 MB)</li>
+							<li>Snapshotted at workflow creation time</li>
+							<li>Each task runs in isolated ECS Fargate container</li>
+							<li>boto3 &amp; stdlib pre-installed; bundle extra deps</li>
+						</ul>
+					</div>
+					<div class="dd-card">
+						<h3>&#128272; Security</h3>
+						<ul>
+							<li>KMS encryption of code bundles at rest</li>
+							<li>IAM execution role per workflow</li>
+							<li>No internet access by default (S3, ECR, CW only)</li>
+							<li>VPC option for custom network policies</li>
+						</ul>
+					</div>
+					<div class="dd-card">
+						<h3>&#128230; Code Bundles</h3>
+						<ul>
+							<li>Single <code>.py</code> or <code>.sh</code> file</li>
+							<li>ZIP archive with modules + dependencies</li>
+							<li>Referenced via <code>create-workflow</code> API</li>
+							<li>Versioned independently of DAG definition</li>
+						</ul>
+					</div>
+					<div class="dd-card">
+						<h3>&#128736; Use Cases</h3>
+						<ul>
+							<li>ETL transformations (CSV &rarr; JSON, Parquet)</li>
+							<li>Data quality checks &amp; validations</li>
+							<li>Shell-based file processing</li>
+							<li>Lightweight ML inference pre/post-processing</li>
+						</ul>
+					</div>
+				</div>
+			</section>
+
+			<!-- ============ 8. CODE EXAMPLE ============ -->
+			<section id="code-example" data-background-color="#050505">
+				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
+				<h2>Example: YAML Workflow Definition</h2>
+				<pre><code class="language-yaml">csv_to_json_pipeline:
+  start_date: "2026-01-01"
+  schedule: null
+  tasks:
+    convert_to_json:
+      operator: airflow.operators.python.PythonOperator
+      python_callable: csv_to_json.convert
+    verify_output:
+      operator: airflow.operators.bash.BashOperator
+      bash_command: "verify_output.sh"
+      dependencies:
+        - convert_to_json</code></pre>
+				<p class="muted" style="font-size:0.6em; margin-top:12px;">
+					DAG-factory compatible YAML &bull; Declarative &bull; Version-controlled in S3
+				</p>
+			</section>
+
+			<!-- ============ 9. OBSERVABILITY ============ -->
+			<section id="observability" data-background-color="#050505">
+				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
+				<h2>Observability with CloudWatch</h2>
+				<div class="deep-dive-grid">
+					<div class="dd-card">
+						<h3>&#128202; Task Logs</h3>
+						<ul>
+							<li>All task stdout/stderr &rarr; CloudWatch Logs</li>
+							<li>Custom log group or auto-created</li>
+							<li>Per-task log streams for easy debugging</li>
+							<li>Retention policies configurable</li>
+						</ul>
+					</div>
+					<div class="dd-card">
+						<h3>&#128200; Metrics</h3>
+						<ul>
+							<li>Workflow run duration, success/failure rates</li>
+							<li>Task-level execution times</li>
+							<li>CloudWatch Alarms for SLA monitoring</li>
+							<li>Dashboard integration</li>
+						</ul>
+					</div>
+					<div class="dd-card">
+						<h3>&#128269; CloudTrail Auditing</h3>
+						<ul>
+							<li>API call logging for compliance</li>
+							<li>Who created/started/deleted workflows</li>
+							<li>Cross-account visibility</li>
+						</ul>
+					</div>
+					<div class="dd-card">
+						<h3>&#127919; Console Monitoring</h3>
+						<ul>
+							<li>MWAA Serverless Console for workflow overview</li>
+							<li>Run history, status, task details</li>
+							<li>CLI &amp; API for programmatic monitoring</li>
+						</ul>
+					</div>
+				</div>
+			</section>
+
+			<!-- ============ 10. THANK YOU ============ -->
+			<section id="thankyou" data-background-color="#050505">
+				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
+				<h2 style="text-align:center;">Thank You!</h2>
+				<p style="text-align:center; font-size:0.8em; margin-top:1em;">
+					<strong>Sriram Ramarathnam</strong> &nbsp;&bull;&nbsp; SDM, AWS Analytics<br>
+					<strong>Karthik Seshadri</strong> &nbsp;&bull;&nbsp; Sr. SDE, AWS Analytics
+				</p>
+				<p style="text-align:center; font-size:0.65em; color: var(--af-muted); margin-top:2em;">
+					Get started: <a href="https://docs.aws.amazon.com/mwaa/latest/mwaa-serverless-userguide/what-is-mwaa-serverless.html" style="color: var(--af-cyan);">docs.aws.amazon.com/mwaa/serverless</a>
+				</p>
+			</section>
+
+		</div>
+	</div>
+
+	<script src="dist/reveal.js"></script>
+	<script src="dist/plugin/notes.js"></script>
+	<script src="dist/plugin/highlight.js"></script>
+	<script>
+		Reveal.initialize({
+			hash: true,
+			width: 1280,
+			height: 720,
+			margin: 0.05,
+			transition: "slide",
+			backgroundTransition: "fade",
+			slideNumber: "c/t",
+			controls: false,
+			plugins: [RevealHighlight, RevealNotes],
+		});
+	</script>
+</body>
+</html>
