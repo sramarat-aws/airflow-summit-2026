@@ -209,7 +209,7 @@
 				<h2>Customer Burden</h2>
 				<ul>
 					<li class="fragment">Provision &amp; size schedulers, workers, databases</li>
-					<li class="fragment">Manage scaling &mdash; over-provision or risk failures</li>
+					<li class="fragment">Manage scaling - over-provision or risk failures</li>
 					<li class="fragment">Patch, upgrade, and secure the environment</li>
 					<li class="fragment">Handle multi-team access control &amp; isolation</li>
 					<li class="fragment">Pay for idle infrastructure 24/7</li>
@@ -243,9 +243,9 @@
 							<div class="pro">+ Pay only for execution time</div>
 							<div class="pro">+ Per-workflow IAM isolation</div>
 							<div class="pro">+ Automatic scaling</div>
-							<div class="pro">+ Built-in workflow versioning</div>
-							<div class="con">&ndash; YAML-based DAG definitions</div>
-							<div class="con">&ndash; No Airflow UI (monitoring via logs)</div>
+							<div class="con">&ndash; Python DAG authoring</div>
+							<div class="con">&ndash; Airflow UI (planned for future)</div>
+							<div class="con">&ndash; Custom operators &amp; plugins (planned for future)</div>
 						</div>
 					</div>
 				</div>
@@ -255,7 +255,7 @@
 			<section id="intro" data-background-color="#050505">
 				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
 				<h2>Introducing Amazon MWAA Serverless</h2>
-				<p style="font-size:0.8em; margin-bottom: 1em;">GA &mdash; November 17, 2025 &nbsp;|&nbsp; Apache Airflow 3 + Python 3.12</p>
+				<p style="font-size:0.8em; margin-bottom: 1em;">GA - November 17, 2025 &nbsp;|&nbsp; Apache Airflow 3 + Python 3.12</p>
 				<div class="features-grid">
 					<div class="feat-card fragment">
 						<h3>&#9889; Serverless Architecture</h3>
@@ -271,7 +271,7 @@
 					</div>
 					<div class="feat-card fragment">
 						<h3>&#128200; Automatic Scaling</h3>
-						<p>Dynamically scales to meet demand &mdash; no manual worker sizing.</p>
+						<p>Dynamically scales to meet demand - no manual worker sizing.</p>
 					</div>
 				</div>
 			</section>
@@ -280,12 +280,12 @@
 			<section id="features" data-background-color="#050505">
 				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
 				<h2>Key Features</h2>
-				<div class="highlight-item fragment"><span class="k">YAML Workflow Definitions</span> &mdash; DAG-factory compatible format, versioned in S3</div>
-				<div class="highlight-item fragment"><span class="k">AWS Operator Integration</span> &mdash; S3, Glue, EMR, Redshift, SageMaker, and more</div>
-				<div class="highlight-item fragment"><span class="k">PythonOperator &amp; BashOperator</span> &mdash; Run custom code bundles up to 250 MB <span class="muted">(New! Aug 2026)</span></div>
-				<div class="highlight-item fragment"><span class="k">VPC Support</span> &mdash; Run tasks in your VPC for network isolation</div>
-				<div class="highlight-item fragment"><span class="k">CloudWatch Observability</span> &mdash; Task logs, metrics, and alarms built-in</div>
-				<div class="highlight-item fragment"><span class="k">Workflow Versioning</span> &mdash; Built-in versioning with rollback support</div>
+				<div class="highlight-item fragment"><span class="k">YAML Workflow Definitions</span> - DAG-factory compatible format, versioned in S3</div>
+				<div class="highlight-item fragment"><span class="k">AWS Operator Integration</span> - S3, Glue, EMR, Redshift, SageMaker, and more</div>
+				<div class="highlight-item fragment"><span class="k">PythonOperator &amp; BashOperator</span> - Run custom code bundles <span class="muted">(New! Aug 2026)</span></div>
+				<div class="highlight-item fragment"><span class="k">VPC Support</span> - Run tasks in your VPC for network isolation</div>
+				<div class="highlight-item fragment"><span class="k">CloudWatch Observability</span> - Task logs</div>
+				<div class="highlight-item fragment"><span class="k">Workflow Versioning</span> - Built-in versioning with rollback support</div>
 			</section>
 
 			<!-- ============ 7. PYTHON & BASH DEEP DIVE ============ -->
@@ -295,12 +295,12 @@
 				<p style="font-size:0.7em; color: var(--af-muted); margin-bottom: 18px;">Run custom Python functions and shell scripts directly in the serverless runtime</p>
 				<div class="deep-dive-grid">
 					<div class="dd-card">
-						<h3>&#128187; Execution Model</h3>
+						<h3>&#128230; Code Bundles</h3>
 						<ul>
-							<li>Code bundle uploaded to S3 (ZIP, up to 250 MB)</li>
-							<li>Snapshotted at workflow creation time</li>
-							<li>Each task runs in isolated ECS Fargate container</li>
-							<li>boto3 &amp; stdlib pre-installed; bundle extra deps</li>
+							<li>Single <code>.py</code> or <code>.sh</code> file</li>
+							<li>ZIP archive with modules + dependencies</li>
+							<li>Referenced via <code>create-workflow</code> API</li>
+							<li>Versioned independently of DAG definition</li>
 						</ul>
 					</div>
 					<div class="dd-card">
@@ -310,15 +310,6 @@
 							<li>IAM execution role per workflow</li>
 							<li>No internet access by default (S3, ECR, CW only)</li>
 							<li>VPC option for custom network policies</li>
-						</ul>
-					</div>
-					<div class="dd-card">
-						<h3>&#128230; Code Bundles</h3>
-						<ul>
-							<li>Single <code>.py</code> or <code>.sh</code> file</li>
-							<li>ZIP archive with modules + dependencies</li>
-							<li>Referenced via <code>create-workflow</code> API</li>
-							<li>Versioned independently of DAG definition</li>
 						</ul>
 					</div>
 					<div class="dd-card">
@@ -349,32 +340,36 @@
       bash_command: "verify_output.sh"
       dependencies:
         - convert_to_json</code></pre>
-				<p class="muted" style="font-size:0.6em; margin-top:12px;">
-					DAG-factory compatible YAML &bull; Declarative &bull; Version-controlled in S3
-				</p>
+				<div style="display:flex; align-items:center; gap:24px; margin-top:18px;">
+					<div style="flex:1;">
+						<p class="muted" style="font-size:0.55em; margin:0 0 6px;">&#128214; Full example</p>
+						<p style="font-size:0.6em; margin:0; line-height:1.35;">
+							<a href="https://aws.amazon.com/blogs/big-data/pythonoperator-and-bashoperator-now-available-on-amazon-managed-workflows-for-apache-airflow-amazon-mwaa-serverless/" style="color: var(--af-cyan);">PythonOperator and BashOperator Now Available on Amazon Managed Workflows for Apache Airflow (Amazon MWAA) Serverless</a>
+						</p>
+					</div>
+					<img src="talk-assets/Blog-QR-Code.png" alt="Blog post QR code" style="width:120px; background:#fff; border-radius:8px; padding:4px; flex:none;">
+				</div>
 			</section>
 
 			<!-- ============ 9. OBSERVABILITY ============ -->
 			<section id="observability" data-background-color="#050505">
 				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
-				<h2>Observability with CloudWatch</h2>
+				<h2>Observability &amp; Monitoring</h2>
 				<div class="deep-dive-grid">
 					<div class="dd-card">
 						<h3>&#128202; Task Logs</h3>
 						<ul>
 							<li>All task stdout/stderr &rarr; CloudWatch Logs</li>
 							<li>Custom log group or auto-created</li>
-							<li>Per-task log streams for easy debugging</li>
 							<li>Retention policies configurable</li>
 						</ul>
 					</div>
 					<div class="dd-card">
-						<h3>&#128200; Metrics</h3>
+						<h3>&#127912; SageMaker Unified Studio</h3>
 						<ul>
-							<li>Workflow run duration, success/failure rates</li>
-							<li>Task-level execution times</li>
-							<li>CloudWatch Alarms for SLA monitoring</li>
-							<li>Dashboard integration</li>
+							<li>Visual workflow authoring &amp; monitoring</li>
+							<li>Manage pipelines alongside data &amp; ML assets</li>
+							<li>Unified build, run &amp; observe experience</li>
 						</ul>
 					</div>
 					<div class="dd-card">
@@ -386,7 +381,7 @@
 						</ul>
 					</div>
 					<div class="dd-card">
-						<h3>&#127919; Console Monitoring</h3>
+						<h3>&#127919; Workflow Visibility</h3>
 						<ul>
 							<li>MWAA Serverless Console for workflow overview</li>
 							<li>Run history, status, task details</li>
@@ -410,10 +405,23 @@
 						<p style="font-size:0.7em; margin-top:8px;"><strong>Karthik Seshadri</strong><br><span class="muted">Sr. SDE, AWS Analytics</span></p>
 					</div>
 				</div>
-				<p style="text-align:center; font-size:0.65em; color: var(--af-muted); margin-top:2em;">
-					Get started: <a href="https://docs.aws.amazon.com/mwaa/latest/mwaa-serverless-userguide/what-is-mwaa-serverless.html" style="color: var(--af-cyan);">docs.aws.amazon.com/mwaa/serverless</a><br>
-					Workshop on Building ML Pipelines on MWAA-Serverless: <span style="color: var(--af-cyan);">&lt;link coming soon&gt;</span>
-				</p>
+				<p style="text-align:center; font-size:1.3em; color: var(--af-cyan); font-weight:700; margin-top:1.4em;">Questions?</p>
+			</section>
+
+			<!-- ============ 11. GET STARTED ============ -->
+			<section id="resources" data-background-color="#050505">
+				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
+				<h2 style="text-align:center;">Get Started</h2>
+				<div style="display:flex; justify-content:center; gap:60px; margin-top:1em;">
+					<div style="text-align:center;">
+						<img src="talk-assets/GettingStarted-QR-Code.png" alt="Get Started QR" style="width:120px; border-radius:8px; background:#fff; padding:4px;">
+						<p style="font-size:0.7em; margin-top:8px;"><strong>Documentation</strong><br><span class="muted">docs.aws.amazon.com/mwaa/serverless</span></p>
+					</div>
+					<div style="text-align:center;">
+						<img src="talk-assets/Workshop-QR-Code.png" alt="Workshop QR" style="width:120px; border-radius:8px; background:#fff; padding:4px;">
+						<p style="font-size:0.7em; margin-top:8px;"><strong>Workshop</strong><br><span class="muted">Building ML Pipelines on MWAA Serverless</span></p>
+					</div>
+				</div>
 			</section>
 
 		</div>
