@@ -288,7 +288,25 @@
 				<div class="highlight-item fragment"><span class="k">Workflow Versioning</span> - Built-in versioning with rollback support</div>
 			</section>
 
-			<!-- ============ 7. PYTHON & BASH DEEP DIVE ============ -->
+			<!-- ============ 7. CODE EXAMPLE ============ -->
+			<section id="code-example" data-background-color="#050505">
+				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
+				<h2>Example: YAML Workflow Definition</h2>
+				<pre><code class="language-yaml">csv_to_json_pipeline:
+  start_date: "2026-01-01"
+  schedule: null
+  tasks:
+    convert_to_json:
+      operator: airflow.operators.python.PythonOperator
+      python_callable: csv_to_json.convert
+    verify_output:
+      operator: airflow.operators.bash.BashOperator
+      bash_command: "verify_output.sh"
+      dependencies:
+        - convert_to_json</code></pre>
+			</section>
+
+			<!-- ============ 8. PYTHON & BASH DEEP DIVE ============ -->
 			<section id="python-bash" data-background-color="#050505">
 				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
 				<h2>PythonOperator &amp; BashOperator</h2>
@@ -321,33 +339,15 @@
 							<li>Lightweight ML inference pre/post-processing</li>
 						</ul>
 					</div>
-				</div>
-			</section>
-
-			<!-- ============ 8. CODE EXAMPLE ============ -->
-			<section id="code-example" data-background-color="#050505">
-				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
-				<h2>Example: YAML Workflow Definition</h2>
-				<pre><code class="language-yaml">csv_to_json_pipeline:
-  start_date: "2026-01-01"
-  schedule: null
-  tasks:
-    convert_to_json:
-      operator: airflow.operators.python.PythonOperator
-      python_callable: csv_to_json.convert
-    verify_output:
-      operator: airflow.operators.bash.BashOperator
-      bash_command: "verify_output.sh"
-      dependencies:
-        - convert_to_json</code></pre>
-				<div style="display:flex; align-items:center; gap:24px; margin-top:18px;">
-					<div style="flex:1;">
-						<p class="muted" style="font-size:0.55em; margin:0 0 6px;">&#128214; Full example</p>
-						<p style="font-size:0.6em; margin:0; line-height:1.35;">
-							<a href="https://aws.amazon.com/blogs/big-data/pythonoperator-and-bashoperator-now-available-on-amazon-managed-workflows-for-apache-airflow-amazon-mwaa-serverless/" style="color: var(--af-cyan);">PythonOperator and BashOperator Now Available on Amazon Managed Workflows for Apache Airflow (Amazon MWAA) Serverless</a>
-						</p>
+					<div class="dd-card">
+						<h3>&#128214; Full Example</h3>
+						<div style="display:flex; align-items:center; gap:12px;">
+							<img src="talk-assets/Blog-QR-Code.png" alt="Blog post QR code" style="width:88px; background:#fff; border-radius:6px; padding:3px; flex:none;">
+							<p style="font-size:0.5em; margin:0; line-height:1.35;">
+								<a href="https://aws.amazon.com/blogs/big-data/pythonoperator-and-bashoperator-now-available-on-amazon-managed-workflows-for-apache-airflow-amazon-mwaa-serverless/" style="color: var(--af-cyan);">PythonOperator and BashOperator Now Available on Amazon Managed Workflows for Apache Airflow (Amazon MWAA) Serverless</a>
+							</p>
+						</div>
 					</div>
-					<img src="talk-assets/Blog-QR-Code.png" alt="Blog post QR code" style="width:120px; background:#fff; border-radius:8px; padding:4px; flex:none;">
 				</div>
 			</section>
 
