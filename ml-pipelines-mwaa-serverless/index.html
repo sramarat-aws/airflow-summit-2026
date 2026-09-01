@@ -292,18 +292,21 @@
 			<section id="code-example" data-background-color="#050505">
 				<img class="summit-badge" src="talk-assets/summit_logo.png" alt="">
 				<h2>Example: YAML Workflow Definition</h2>
-				<pre><code class="language-yaml">csv_to_json_pipeline:
-  start_date: "2026-01-01"
-  schedule: null
+				<pre><code class="language-yaml">simples3test:
+  dag_id: simples3test
+  schedule: 0 0 * * *
   tasks:
-    convert_to_json:
-      operator: airflow.operators.python.PythonOperator
-      python_callable: csv_to_json.convert
-    verify_output:
-      operator: airflow.operators.bash.BashOperator
-      bash_command: "verify_output.sh"
-      dependencies:
-        - convert_to_json</code></pre>
+    list_objects:
+      operator: airflow.providers.amazon.aws.operators.s3.S3ListOperator
+      bucket: 'amzn-s3-demo-bucket'
+      prefix: ''
+      retries: 0
+    create_object_list:
+      operator: airflow.providers.amazon.aws.operators.s3.S3CreateObjectOperator
+      data: '{{ ti.xcom_pull(task_ids="list_objects", key="return_value") }}'
+      s3_bucket: 'amzn-s3-demo-bucket'
+      s3_key: 'filelist.txt'
+      dependencies: [list_objects]</code></pre>
 			</section>
 
 			<!-- ============ 8. PYTHON & BASH DEEP DIVE ============ -->
